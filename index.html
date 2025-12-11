@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>GateBrain - GATE Exam Coach</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .tab:hover {
+            background: var(--bg-hover);
+            border-color: var(--primary);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Content Sections */
+        .section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+
+        .card h3 {
+            color: var(--text);
+            margin: 16px 0 12px 0;
+            font-size: 1.2rem;
+        }
+
+        /* Topic Grid */
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .topic-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .topic-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+        }
+
+        .topic-card.high-priority {
+            border-left: 4px solid var(--danger);
+        }
+
+        .topic-card.medium-priority {
+            border-left: 4px solid var(--warning);
+        }
+
+        .topic-card.low-priority {
+            border-left: 4px solid var(--success);
+        }
+
+        .topic-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .topic-marks {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            background: var(--border);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.5s;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        /* Question Card */
+        .question-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .question-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-easy { background: var(--success); color: white; }
+        .badge-medium { background: var(--warning); color: white; }
+        .badge-hard { background: var(--danger); color: white; }
+        .badge-topic { background: var(--primary); color: white; }
+
+        .question-text {
+            font-size: 1.1rem;
+            margin: 16px 0;
+            line-height: 1.8;
+        }
+
+        .options {
+            margin: 20px 0;
+        }
+
+        .option {
+            background: var(--bg-hover);
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .option:hover {
+            border-color: var(--primary);
+            background: var(--border);
+        }
+
+        .option.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .option.wrong {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .solution {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 16px;
+            margin-top: 16px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .solution.show {
+            display: block;
+        }
+
+        /* Stats Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Input Fields */
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-hover);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+            margin: 8px 0;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-top: 16px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .topic-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: nowrap;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Install Prompt */
+        .install-prompt {
+            background: linear-gradient(135deg, var(--success), #059669);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .install-prompt.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🧠 GateBrain</h1>
+        <p>Your Personal GATE CS/AI/DS Exam Coach</p>
+    </header>
+
+    <div class="container">
+        <!-- Install Prompt -->
+        <div class="install-prompt" id="installPrompt">
+            <div>
+                <strong>📱 Install GateBrain</strong>
+                <p style="font-size: 0.9rem; margin-top: 4px;">Add to home screen for app-like experience!</p>
+            </div>
+            <button class="btn btn-primary" onclick="installApp()">Install</button>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <div class="tab active" onclick="showSection('dashboard')">📊 Dashboard</div>
+            <div class="tab" onclick="showSection('syllabus')">📚 Syllabus</div>
+            <div class="tab" onclick="showSection('practice')">✍️ Practice</div>
+            <div class="tab" onclick="showSection('papers')">📄 Papers</div>
+            <div class="tab" onclick="showSection('planner')">📅 Planner</div>
+            <div class="tab" onclick="showSection('profile')">⚙️ Profile</div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="daysLeft">--</div>
+                    <div class="stat-label">Days to GATE</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="topicsCovered">0/11</div>
+                    <div class="stat-label">Topics Covered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="questionsSolved">0</div>
+                    <div class="stat-label">Questions Solved</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="accuracy">0%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🎯 Today's Focus</h2>
+                <div id="todayFocus">
+                    <p style="color: var(--text-muted);">Set up your profile to get personalized recommendations!</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📈 Your Progress</h2>
+                <div id="progressOverview">
+                    <p style="color: var(--text-muted);">Complete your profile setup to track progress.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Syllabus Section -->
+        <div id="syllabus" class="section">
+            <div class="card">
+                <h2>📚 GATE CS Syllabus (2024-2025)</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Click on any topic to see detailed subtopics and weightage</p>
+                
+                <div class="topic-grid" id="csSyllabus">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🤖 GATE DA (Data Science & AI) Syllabus</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Introduced in GATE 2024</p>
+                
+                <div class="topic-grid" id="daSyllabus">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Practice Section -->
+        <div id="practice" class="section">
+            <div class="card">
+                <h2>✍️ Practice Questions</h2>
+                <div style="margin-bottom: 20px;">
+                    <label>Select Topic:</label>
+                    <select id="practiceTopicSelect" onchange="loadPracticeQuestions()">
+                        <option value="">-- Choose a topic --</option>
+                    </select>
+                    
+                    <label>Difficulty:</label>
+                    <select id="difficultySelect">
+                        <option value="all">All Levels</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                    
+                    <button class="btn btn-primary" onclick="loadPracticeQuestions()">Load Questions</button>
+                </div>
+                
+                <div id="practiceQuestions">
+                    <p style="color: var(--text-muted);">Select a topic to start practicing!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Papers Section -->
+        <div id="papers" class="section">
+            <div class="card">
+                <h2>📄 Previous Year Papers</h2>
+                
+                <h3>GATE CS Papers (2020-2024)</h3>
+                <div style="margin: 16px 0;">
+                    <button class="btn btn-primary" onclick="window.open('https://gatenotes.in/gate-question-paper-cse.php', '_blank')">📥 Download CS Papers</button>
+                    <button class="btn btn-success" onclick="window.open('https://www.pw.live/gate/exams/gate-computer-science-engineering-previous-year-papers-with-solutions', '_blank')">📝 Papers with Solutions</button>
+                </div>
+
+                <h3>GATE DA Papers (2024-2025)</h3>
+                <div style="margin: 16px 0;">
+                    <button class="btn btn-primary" onclick="window.open('https://www.pw.live/gate/exams/gate-da-previous-year-papers', '_blank')">📥 Download DA Papers</button>
+                    <button class="btn btn-success" onclick="window.open('https://gate2024.iisc.ac.in/wp-content/uploads/2023/10/DataScienceAISampleQuestionPaper.pdf', '_blank')">📄 Official Sample Paper</button>
+                </div>
+
+                <h3>Topic-wise Analysis</h3>
+                <div id="paperAnalysis">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Planner Section -->
+        <div id="planner" class="section">
+            <div class="card">
+                <h2>📅 Study Planner</h2>
+                
+                <label>Target Exam Date:</label>
+                <input type="date" id="examDate" onchange="updatePlanner()">
+                
+                <label>Daily Study Hours:</label>
+                <input type="number" id="studyHours" min="1" max="16" value="4" onchange="updatePlanner()">
+                
+                <label>Days per Week:</label>
+                <input type="number" id="studyDays" min="1" max="7" value="6" onchange="updatePlanner()">
+                
+                <button class="btn btn-primary" onclick="generateStudyPlan()">Generate Study Plan</button>
+                
+                <div id="studyPlanOutput" style="margin-top: 20px;">
+                    <!-- Generated plan will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profile" class="section">
+            <div class="card">
+                <h2>⚙️ Your Profile</h2>
+                
+                <label>Target Paper:</label>
+                <select id="targetPaper" onchange="saveProfile()">
+                    <option value="CS">GATE CS</option>
+                    <option value="DA">GATE DA</option>
+                    <option value="BOTH">Both CS & DA</option>
+                </select>
+                
+                <label>Weak Topics (comma-separated):</label>
+                <textarea id="weakTopics" rows="3" placeholder="e.g., Dynamic Programming, Compiler Design, Probability" onchange="saveProfile()"></textarea>
+                
+                <label>Strong Topics (comma-separated):</label>
+                <textarea id="strongTopics" rows="3" placeholder="e.g., Data Structures, Operating Systems" onchange="saveProfile()"></textarea>
+                
+                <label>Current Preparation Stage:</label>
+                <select id="prepStage" onchange="saveProfile()">
+                    <option value="starting">Just Starting</option>
+                    <option value="mid">Mid Preparation</option>
+                    <option value="revision">Revision Phase</option>
+                    <option value="final">Final Sprint</option>
+                </select>
+                
+                <button class="btn btn-primary" onclick="saveProfile()">💾 Save Profile</button>
+                <button class="btn btn-warning" onclick="resetProgress()">🔄 Reset All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        const GATE_CS_TOPICS = [
+            { name: 'Engineering Mathematics', marks: '13', priority: 'high', subtopics: ['Discrete Math', 'Linear Algebra', 'Calculus', 'Probability'] },
+            { name: 'Digital Logic', marks: '5-6', priority: 'low', subtopics: ['Boolean Algebra', 'Combinational Circuits', 'Sequential Circuits'] },
+            { name: 'Computer Organization & Architecture', marks: '9-12', priority: 'high', subtopics: ['Pipeline', 'Cache Memory', 'I/O Systems', 'Instruction Set'] },
+            { name: 'Programming & Data Structures', marks: '8-10', priority: 'high', subtopics: ['Arrays', 'Linked Lists', 'Trees', 'Graphs', 'Hashing'] },
+            { name: 'Algorithms', marks: '6-8', priority: 'high', subtopics: ['Sorting', 'Searching', 'Greedy', 'Dynamic Programming', 'Graph Algorithms'] },
+            { name: 'Theory of Computation', marks: '7-9', priority: 'medium', subtopics: ['Regular Languages', 'CFG', 'Turing Machines', 'Decidability'] },
+            { name: 'Compiler Design', marks: '5-8', priority: 'medium', subtopics: ['Lexical Analysis', 'Parsing', 'Code Generation', 'Optimization'] },
+            { name: 'Operating Systems', marks: '7-10', priority: 'high', subtopics: ['Process Management', 'Memory Management', 'File Systems', 'Deadlocks'] },
+            { name: 'Databases', marks: '5-8', priority: 'medium', subtopics: ['ER Model', 'SQL', 'Normalization', 'Transactions', 'Indexing'] },
+            { name: 'Computer Networks', marks: '8-9', priority: 'high', subtopics: ['OSI Model', 'TCP/IP', 'Routing', 'Network Security'] },
+            { name: 'General Aptitude', marks: '15', priority: 'high', subtopics: ['Verbal Ability', 'Numerical Ability'] }
+        ];
+
+        const GATE_DA_TOPICS = [
+            { name: 'Probability & Statistics', marks: 'High', priority: 'high', subtopics: ['Distributions', 'Hypothesis Testing', 'Bayesian Methods'] },
+            { name: 'Linear Algebra', marks: 'High', priority: 'high', subtopics: ['Matrices', 'Eigenvalues', 'SVD', 'Vector Spaces'] },
+            { name: 'Calculus & Optimization', marks: 'Medium', priority: 'medium', subtopics: ['Derivatives', 'Taylor Series', 'Optimization'] },
+            { name: 'Programming & Algorithms', marks: 'Medium', priority: 'medium', subtopics: ['Python', 'Data Structures', 'Graph Algorithms'] },
+            { name: 'Database & Warehousing', marks: 'Medium', priority: 'medium', subtopics: ['SQL', 'Data Modeling', 'ETL'] },
+            { name: 'Machine Learning', marks: 'High', priority: 'high', subtopics: ['Regression', 'Classification', 'Clustering', 'Neural Networks'] },
+            { name: 'Artificial Intelligence', marks: 'Medium', priority: 'high', subtopics: ['Search Algorithms', 'Logic', 'Probabilistic Reasoning'] }
+        ];
+
+        const SAMPLE_QUESTIONS = {
+            'Algorithms': [
+                {
+                    text: 'What is the time complexity of the following recurrence relation? T(n) = 2T(n/2) + n',
+                    options: ['O(n)', 'O(n log n)', 'O(n²)', 'O(log n)'],
+                    correct: 1,
+                    difficulty: 'medium',
+                    year: '2023',
+                    solution: 'Using Master Theorem: a=2, b=2, f(n)=n. Since f(n) = Θ(n^log_b(a)), the complexity is Θ(n log n).'
+                },
+                {
+                    text: 'Which sorting algorithm has the best average-case time complexity?',
+                    options: ['Bubble Sort', 'Quick Sort', 'Insertion Sort', 'Selection Sort'],
+                    correct: 1,
+                    difficulty: 'easy',
+                    year: '2022',
+                    solution: 'Quick Sort has O(n log n) average-case complexity, which is better than O(n²) for the other options.'
+                }
+            ],
+            'Operating Systems': [
+                {
+                    text: 'In a system with 4 processes and 3 resource types, what is the maximum number of resources needed to avoid deadlock?',
+                    options: ['12', '11', '10', '9'],
+                    correct: 2,
+                    difficulty: 'hard',
+                    year: '2024',
+                    solution: 'Using Banker\'s algorithm: Maximum resources = (n-1) × m + 1, where n=4 processes, m=3 resources. Answer: 3×3+1 = 10.'
+                }
+            ],
+            'Databases': [
+                {
+                    text: 'Which normal form eliminates transitive dependencies?',
+                    options: ['1NF', '2NF', '3NF', 'BCNF'],
+                    correct: 2,
+                    difficulty: 'medium',
+                    year: '2023',
+                    solution: 'Third Normal Form (3NF) eliminates transitive dependencies. BCNF is stricter but 3NF specifically addresses this.'
+                }
+            ]
+        };
+
+        // Initialize App
+        function initApp() {
+            loadProfile();
+            renderSyllabus();
+            updateDashboard();
+            populatePracticeTopics();
+            checkInstallPrompt();
+        }
+
+        // Section Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Render Syllabus
+        function renderSyllabus() {
+            const csContainer = document.getElementById('csSyllabus');
+            const daContainer = document.getElementById('daSyllabus');
+
+            csContainer.innerHTML = GATE_CS_TOPICS.map(topic => `
+                <div class="topic-card ${topic.priority}-priority" onclick="showTopicDetails('${topic.name}')">
+                    <div class="topic-name">${topic.name}</div>
+                    <div class="topic-marks">📊 Weightage: ${topic.marks} marks</div>
+                    <div class="topic-marks">🎯 Priority: ${topic.priority.toUpperCase()}</div>
+                    <div style="margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">
+                        ${topic.subtopics.slice(0, 3).join(' • ')}
+                    </div>
+                </div>
+            `).join('');
+
+            daContainer.innerHTML = GATE_DA_TOPICS.map(topic => `
+                <div class="topic-card ${topic.priority}-priority" onclick="showTopicDetails('${topic.name}')">
+                    <div class="topic-name">${topic.name}</div>
+                    <div class="topic-marks">📊 Weightage: ${topic.marks}</div>
+                    <div class="topic-marks">🎯 Priority: ${topic.priority.toUpperCase()}</div>
+                    <div style="margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">
+                        ${topic.subtopics.slice(0, 3).join(' • ')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Show Topic Details
+        function showTopicDetails(topicName) {
+            const topic = [...GATE_CS_TOPICS, ...GATE_DA_TOPICS].find(t => t.name === topicName);
+            if (!topic) return;
+
+            alert(`📚 ${topic.name}\n\n` +
+                  `Weightage: ${topic.marks} marks\n` +
+                  `Priority: ${topic.priority.toUpperCase()}\n\n` +
+                  `Subtopics:\n${topic.subtopics.map((s, i) => `${i+1}. ${s}`).join('\n')}\n\n` +
+                  `Click "Practice" tab to solve questions on this topic!`);
+        }
+
+        // Populate Practice Topics
+        function populatePracticeTopics() {
+            const select = document.getElementById('practiceTopicSelect');
+            const allTopics = [...GATE_CS_TOPICS, ...GATE_DA_TOPICS];
+            
+            select.innerHTML = '<option value="">-- Choose a topic --</option>' +
+                allTopics.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+        }
+
+        // Load Practice Questions
+        function loadPracticeQuestions() {
+            const topic = document.getElementById('practiceTopicSelect').value;
+            const difficulty = document.getElementById('difficultySelect').value;
+            const container = document.getElementById('practiceQuestions');
+
+            if (!topic) {
+                container.innerHTML = '<p style="color: var(--text-muted);">Please select a topic first!</p>';
+                return;
+            }
+
+            const questions = SAMPLE_QUESTIONS[topic] || [];
+            
+            if (questions.length === 0) {
+                container.innerHTML = `
+                    <div class="card">
+                        <h3>📝 ${topic} - Practice Questions</h3>
+                        <p style="color: var(--text-muted); margin: 20px 0;">
+                            Sample questions for this topic are being prepared. 
+                            Meanwhile, download previous year papers from the "Papers" tab!
+                        </p>
+                        <button class="btn btn-primary" onclick="showSection('papers'); document.querySelectorAll('.tab')[3].click();">
+                            📄 Go to Papers
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = questions.map((q, idx) => `
+                <div class="question-card">
+                    <div class="question-header">
+                        <strong>Question ${idx + 1}</strong>
+                        <div class="question-meta">
+                            <span class="badge badge-${q.difficulty}">${q.difficulty.toUpperCase()}</span>
+                            <span class="badge badge-topic">GATE ${q.year}</span>
+                        </div>
+                    </div>
+                    <div class="question-text">${q.text}</div>
+                    <div class="options">
+                        ${q.options.map((opt, i) => `
+                            <div class="option" onclick="checkAnswer(${idx}, ${i}, ${q.correct})">
+                                ${String.fromCharCode(65 + i)}. ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="btn btn-primary" onclick="toggleSolution(${idx})">💡 Show Solution</button>
+                    <div class="solution" id="solution-${idx}">
+                        <strong>✅ Correct Answer: ${String.fromCharCode(65 + q.correct)}</strong>
+                        <p style="margin-top: 8px;">${q.solution}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Check Answer
+        function checkAnswer(qIdx, selected, correct) {
+            const options = document.querySelectorAll(`#practiceQuestions .question-card:nth-child(${qIdx + 1}) .option`);
+            options.forEach((opt, i) => {
+                opt.classList.remove('correct', 'wrong');
+                if (i === correct) opt.classList.add('correct');
+                else if (i === selected) opt.classList.add('wrong');
+            });
+
+            // Update stats
+            const stats = JSON.parse(localStorage.getItem('gatebrainStats') || '{"solved": 0, "correct": 0}');
+            stats.solved++;
+            if (selected === correct) stats.correct++;
+            localStorage.setItem('gatebrainStats', JSON.stringify(stats));
+            updateDashboard();
+        }
+
+        // Toggle Solution
+        function toggleSolution(idx) {
+            const solution = document.getElementById(`solution-${idx}`);
+            solution.classList.toggle('show');
+        }
+
+        // Update Dashboard
+        function updateDashboard() {
+            const profile = JSON.parse(localStorage.getItem('gatebrainProfile') || '{}');
+            const stats = JSON.parse(localStorage.getItem('gatebrainStats') || '{"solved": 0, "correct": 0}');
+
+            // Days to exam
+            if (profile.examDate) {
+                const days = Math.ceil((new Date(profile.examDate) - new Date()) / (1000 * 60 * 60 * 24));
+                document.getElementById('daysLeft').textContent = days > 0 ? days : 'EXAM DAY!';
+            }
+
+            // Questions solved
+            document.getElementById('questionsSolved').textContent = stats.solved || 0;
+
+            // Accuracy
+            const accuracy = stats.solved > 0 ? Math.round((stats.correct / stats.solved) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+
+            // Today's focus
+            if (profile.weakTopics) {
+                const weakList = profile.weakTopics.split(',').map(t => t.trim());
+                const todayTopic = weakList[new Date().getDate() % weakList.length];
+                document.getElementById('todayFocus').innerHTML = `
+                    <h3 style="color: var(--primary);">🎯 ${todayTopic}</h3>
+                    <p style="margin: 12px 0;">Focus on this weak area today. Solve at least 10 questions!</p>
+                    <button class="btn btn-primary" onclick="focusOnTopic('${todayTopic}')">Start Practice</button>
+                `;
+            }
+        }
+
+        // Focus on Topic
+        function focusOnTopic(topic) {
+            document.getElementById('practiceTopicSelect').value = topic;
+            showSection('practice');
+            document.querySelectorAll('.tab')[2].click();
+            loadPracticeQuestions();
+        }
+
+        // Save Profile
+        function saveProfile() {
+            const profile = {
+                targetPaper: document.getElementById('targetPaper').value,
+                weakTopics: document.getElementById('weakTopics').value,
+                strongTopics: document.getElementById('strongTopics').value,
+                prepStage: document.getElementById('prepStage').value,
+                examDate: document.getElementById('examDate').value
+            };
+            localStorage.setItem('gatebrainProfile', JSON.stringify(profile));
+            alert('✅ Profile saved successfully!');
+            updateDashboard();
+        }
+
+        // Load Profile
+        function loadProfile() {
+            const profile = JSON.parse(localStorage.getItem('gatebrainProfile') || '{}');
+            if (profile.targetPaper) document.getElementById('targetPaper').value = profile.targetPaper;
+            if (profile.weakTopics) document.getElementById('weakTopics').value = profile.weakTopics;
+            if (profile.strongTopics) document.getElementById('strongTopics').value = profile.strongTopics;
+            if (profile.prepStage) document.getElementById('prepStage').value = profile.prepStage;
+            if (profile.examDate) document.getElementById('examDate').value = profile.examDate;
+        }
+
+        // Generate Study Plan
+        function generateStudyPlan() {
+            const examDate = document.getElementById('examDate').value;
+            const hoursPerDay = parseInt(document.getElementById('studyHours').value);
+            const daysPerWeek = parseInt(document.getElementById('studyDays').value);
+
+            if (!examDate) {
+                alert('Please set your exam date first!');
+                return;
+            }
+
+            const daysLeft = Math.ceil((new Date(examDate) - new Date()) / (1000 * 60 * 60 * 24));
+            const totalHours = daysLeft * (hoursPerDay * daysPerWeek / 7);
+
+            const output = document.getElementById('studyPlanOutput');
+            output.innerHTML = `
+                <div class="card">
+                    <h3>📊 Your Study Plan</h3>
+                    <p><strong>Days Remaining:</strong> ${daysLeft} days</p>
+                    <p><strong>Total Study Hours Available:</strong> ${Math.round(totalHours)} hours</p>
+                    <p><strong>Weekly Study Hours:</strong> ${hoursPerDay * daysPerWeek} hours</p>
+                    
+                    <h4 style="margin-top: 20px;">Recommended Schedule:</h4>
+                    <ul style="line-height: 2;">
+                        <li>📚 <strong>High Priority Topics</strong> (60% time): OS, COA, CN, Algorithms, Engg Math</li>
+                        <li>📖 <strong>Medium Priority Topics</strong> (30% time): DBMS, TOC, Compiler Design</li>
+                        <li>📝 <strong>Revision & Practice</strong> (10% time): Mock tests, previous years</li>
+                    </ul>
+                    
+                    <h4 style="margin-top: 20px;">Weekly Breakdown:</h4>
+                    <ul style="line-height: 2;">
+                        <li>Mon-Fri: Focus on 1-2 topics per day (${hoursPerDay} hrs/day)</li>
+                        <li>Saturday: Full mock test + analysis</li>
+                        <li>Sunday: Revision of weak areas</li>
+                    </ul>
+                    
+                    <button class="btn btn-success" onclick="alert('Study plan saved! Check Dashboard for daily focus.')">
+                        💾 Save This Plan
+                    </button>
+                </div>
+            `;
+        }
+
+        // Reset Progress
+        function resetProgress() {
+            if (confirm('⚠️ This will delete all your progress data. Are you sure?')) {
+                localStorage.clear();
+                alert('✅ All data reset successfully!');
+                location.reload();
+            }
+        }
+
+        // Install App (PWA)
+        let deferredPrompt;
+        function checkInstallPrompt() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                document.getElementById('installPrompt').classList.remove('hidden');
+            });
+        }
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('installPrompt').classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                alert('📱 To install:\n\niOS: Tap Share → Add to Home Screen\nAndroid: Tap Menu (⋮) → Install App');
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initApp);
+    </script>
+</body>
+</html>
